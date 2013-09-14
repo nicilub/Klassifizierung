@@ -12,25 +12,25 @@ K = 10;          % 10 Labels, von 1 bis 10 (die Zahl 0 entspricht Label 10)
 
 % Zeilenvektoren, in die die Genauigkeit der Algorithmen fuer jeden Durchlauf der 
 % Kreuzvalidierung geschrieben werden
-lrGenauigkeit = zeros(1,K); 
-nnGenauigkeit = zeros(1,K);
+lrGenauigkeit = zeros(1,10); 
+nnGenauigkeit = zeros(1,10);
+
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%% Laden der Daten und Visualisierung %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 fprintf('\nLaden der Daten...\n');
 fprintf('\n');
 load('Daten.mat'); % Daten in die Matrix X und in den Label-Vektor y geladen
-%X = X(1:1000,:);
 
 [m_konst n] = size(X);
-%zuf_beisp = randperm(m,100); % Zufaellige Wahl von 100 Beispielen 
-%A = X(zuf_beisp,:);
+zuf_beisp = randperm(m_konst,100); % Zufaellige Wahl von 100 Beispielen 
+A = X(zuf_beisp,:);
 
 % Visualisiere die Daten mit Hilfe der Funktion DatenVis
-%DatenVis(A);
+DatenVis(A);
 
-%fprintf('Pause. Druecke Enter zum Fortfahren.\n');
-%% pause;
+fprintf('Pause. Druecke Enter zum Fortfahren.\n');
+pause;
 
 % Erzeuge einen m_konst-dimensionalen Spaltenvektor p, der die Zahlen 1,..,10 mit der gleichen
 % Haeufigkeit und in zufaelliger Reihenfolge enthaelt, um die Daten fuer die
@@ -48,7 +48,7 @@ p = p(r)';
 %
 
 lambda = 1; % Regularisierungsparameter
-Traingszeit_oneveall = zeros(1,10);
+Trainingszeit_onevsall = zeros(1,10);
 % 10-fache Kreuzvalidierung
 for i = 1:10
 
@@ -68,7 +68,8 @@ fprintf('\n');
 
 [Theta] = LogReg(X_train, y_train, K, lambda);
 
-Trainingszeit_onvsall(i) = toc;
+Trainingszeit_onevsall(i) = toc;
+
 % Berechnen der Genauigkeit 
 lr_label = lrLabel(Theta, X_test);
 lrGenauigkeit(i) = mean(double(lr_label == y_test)) * 100;
@@ -89,7 +90,7 @@ initial_nnParameter = [initial_Theta1(:) ; initial_Theta2(:)];
 
 lambda = 1; % Regularisierungsparameter
 optionen = optimset('MaxIter', 50); % Maximale Anzahl der Iterationsschritte in fmincg gleich 50
-Traingszeit_nn = zeros(1,10);
+Trainingszeit_nn = zeros(1,10);
 
 % 10-fache Kreuzvalidierung
 for i = 1:10
@@ -117,7 +118,7 @@ Theta1 = reshape(nnParameter(1:S * (n + 1)), S, (n + 1));
 
 Theta2 = reshape(nnParameter((1 + (S * (n + 1))):end), K, (S + 1));
 
-Traingszeit_nn(i) = toc;
+Trainingszeit_nn(i) = toc;
 
 % Berechnen der Genauigkeit 
 nn_label = nnLabel(Theta1, Theta2, X_test);
@@ -125,19 +126,17 @@ nnGenauigkeit(i) = mean(double(nn_label == y_test)) * 100;
 
 end % Ende der Kreuzvalidierung
 
-fprintf('\nGenauigkeit der Klassifizierung One vs All:\n%5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f\n', lrGenauigkeit);
+fprintf('\nGenauigkeit der Klassifizierung One vs All in allen Durchläufen:\n%5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f\n', lrGenauigkeit);
 fprintf('\nDurchschnittliche Genauigkeit: %5.2f\n', mean(lrGenauigkeit));
-fprintf('\nGenauigkeit der Klassifizierung Neuronales Netzwerk:\n%5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f\n', nnGenauigkeit);
+fprintf('\nGenauigkeit der Klassifizierung Neuronales Netzwerk in allen Durchläufen:\n%5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f %5.2f\n', nnGenauigkeit);
 fprintf('\nDurchschnittliche Genauigkeit: %5.2f\n', mean(nnGenauigkeit));
 
-fprintf('\nLaufzeiten:');
-zeit_onvsall = mean(Traingszeit_oneveall);
-zeit_nn = mean(Traingszeit_nn);
+fprintf('\nTrainingszeiten:');
+zeit_onvsall = mean(Trainingszeit_onevsall);
+zeit_nn = mean(Trainingszeit_nn);
 fprintf('\n');
-fprintf('\nDurchschnittliche Trainingszeit One-vs-All:  %f s \n', zeit_onvsall);
-fprintf('\nDurchschnittliche Trainingszeit Neuronales Netzwerk: %f min %f s \n', floor(zeit_nn/60), mod(zeit_nn,60));
-
-
+fprintf('\nDurchschnittliche Trainingszeit One-vs-All:  %4.2f s \n', zeit_onvsall);
+fprintf('\nDurchschnittliche Trainingszeit Neuronales Netzwerk: %1.0f min %4.2f s \n', floor(zeit_nn/60), mod(zeit_nn,60));
 
 
 
